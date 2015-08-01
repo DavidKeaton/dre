@@ -30,3 +30,14 @@
 
 # Debug files
 *.dSYM/
+
+# other
+*~
+*.vim
+*.session
+*.orig
+*.old
+.old/
+obj/
+makeit.sh
+
