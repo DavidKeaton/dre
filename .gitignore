@@ -1,4 +1,5 @@
 # Object files
+obj/
 *.o
 *.ko
 *.obj
@@ -31,13 +32,13 @@
 # Debug files
 *.dSYM/
 
-# other
+# Vim
 *~
 *.vim
 *.session
-*.orig
-*.old
+
+# Misc
 .old/
-obj/
-makeit.sh
+*.old
+*.orig
 
