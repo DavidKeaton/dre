@@ -1,17 +1,18 @@
-SDIR = src
-ODIR = obj
-
 TARGET	= dre
+STATIC	= 
 
-SOURCES = $(wildcard $(SDIR)/*.cpp)
-HEADERS = $(wildcard $(SDIR)/*.h)
-OBJS = $(patsubst %,$(ODIR)/%, \
-	   $(SOURCES:$(SDIR)/%.cpp=%.o))
+ODIR = obj
+DDIR = dist
+
+MODULES = dre io map snd ui
+OBJS    = $(patsubst %,$(ODIR)/%.a,$(MODULES))
 
 CXX			:= $(CROSS)$(CXX)
 CXXFLAGS	+= -std=c++11 -fPIC
 LDFLAGS		+= -soname,lib$(TARGET).so
 DEFINES =
+
+LIBFLAGS	= $(CPPFLAGS) $(CXXFLAGS) -shared -Wl,$(LDFLAGS)
 
 ifeq ($(OPTIMIZE),1)
   ifeq ($(CROSS),"")
@@ -24,29 +25,44 @@ ifeq ($(DEBUG),1)
 else ifeq ($(RELEASE),1)
   CXXFLAGS += -O3
 endif
+#$(CXX) $(CXXFLAGS) -shared -Wl,$(LDFLAGS) -o $(DDIR)/$@ $(OBJS)
 #===========================================================
-all: $(TARGET)
+all: lib archive
 	@
 
-$(TARGET): $(ODIR) $(OBJS)
-	$(CXX) -shared -Wl,$(LDFLAGS) -o lib$(TARGET).so $(OBJS)
+lib: $(DDIR) $(ODIR) $(OBJS)
+	$(CXX) $(LIBFLAGS) -o $(DDIR)/libdre.so $(OBJS)
 
-archive: $(TARGET).a
-	@
+archive: $(DDIR) $(ODIR) $(OBJS)
+	ar rcs $(DDIR)/dre.a $(OBJS)
 
-$(TARGET).a: $(ODIR) $(OBJS)
-	ar rcs $(TARGET).a $(OBJS)
+$(ODIR)/dre.a:
+	make -C src
+
+$(ODIR)/io.a:
+	make -C src/io
+
+$(ODIR)/map.a:
+	make -C src/map
+
+$(ODIR)/snd.a:
+	make -C src/snd
+
+$(ODIR)/ui.a:
+	make -C src/ui
+
+$(DDIR):
+	mkdir -p $(DDIR)
 
 $(ODIR):
 	mkdir -p $(ODIR)
 
-$(ODIR)/%.o: $(SDIR)/%.cpp
-	$(CXX) $(CPPFLAGS) $(DEFINES) $(CXXFLAGS) -c $< -o $@
-
-.PHONY: clean ctags
+.PHONY: clean
 clean: 
-	rm -rf lib$(TARGET).so $(TARGET).a $(ODIR)
-
-ctags:
-	ctags $(SOURCES) $(HEADERS)
+	rm -rf $(DDIR) $(ODIR)
+	make -C src clean
+	make -C src/io clean
+	make -C src/map clean
+	make -C src/snd clean
+	make -C src/ui clean
 

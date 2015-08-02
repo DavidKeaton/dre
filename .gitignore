@@ -36,6 +36,7 @@ obj/
 *~
 *.vim
 *.session
+.*.sw*
 
 # Misc
 .old/
